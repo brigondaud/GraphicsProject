@@ -16,13 +16,12 @@ from itertools import cycle
 from PIL import Image
 
 from Shader import Shader
-# from Node import Node
-# from VertexArray import VertexArray
-# from ColorMesh import ColorMesh
-# from load import load, load_textured
-# from Texture import Texture
-# from TexturedMesh import TexturedMesh
-# from Cylinder import Cylinder
+from Node import Node
+from VertexArray import VertexArray
+from ColorMesh import ColorMesh
+from load import load, load_textured
+from Texture import Texture
+from TexturedMesh import TexturedMesh
 
 
 # -------------- Example texture plane class ----------------------------------
