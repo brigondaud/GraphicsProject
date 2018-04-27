@@ -1,5 +1,6 @@
 from TexturedMesh import TexturedMesh
 from Texture import Texture
+from load import load_textured
 
 class Skybox:
     """
@@ -9,4 +10,3 @@ class Skybox:
         """
         The skybox is made of a cube without depth effect.
         """
-        self.texture = Texture("skyboxTexture/")
