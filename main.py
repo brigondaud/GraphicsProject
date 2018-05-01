@@ -10,9 +10,11 @@ def main():
     """ Run the rendering loop for the scene. """
     viewer = Viewer()
     sky = Skybox()
-    ground = Ground(-1, 1, -1, 1, 10, 50, 0.2)
+    ground = Ground((-10, -10), 0.1, 0.2)
     for mesh in sky.getMeshes():
         viewer.add(mesh)
+
+    # viewer.add(ground.mesh)
 
     viewer.run()
 
