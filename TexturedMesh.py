@@ -35,6 +35,12 @@ class TexturedMesh:
 
         self.texture = texture
 
+    def setShader(self, vertexShader, fragmentShader):
+        """
+        sets a new shader for the textures mesh
+        """
+        self.shader = Shader(vertexShader, fragmentShader)
+
     def draw(self, projection, view, model, win=None, **_kwargs):
 
         GL.glUseProgram(self.shader.glid)

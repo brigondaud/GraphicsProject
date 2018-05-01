@@ -47,9 +47,7 @@ def load_textured(file):
     # prepare textured mesh
     meshes = []
     for mesh in scene.meshes:
-        print("here")
         texture = scene.materials[mesh.materialindex].texture
-        print("after")
 
         # tex coords in raster order: compute 1 - y to follow OpenGL convention
         tex_uv = ((0, 1) + mesh.texturecoords[0][:, :2] * (1, -1)
