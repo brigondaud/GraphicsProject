@@ -21,12 +21,14 @@ uniform mat4 boneMatrix[MAX_BONES];
 // ---- vertex attributes
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 tex_uv;
-layout(location = 2) in vec3 normal;
+layout(location = 2) in vec3 inNormal;
 layout(location = 3) in vec4 bone_ids;
 layout(location = 4) in vec4 bone_weights;
 
 // ----- interpolated attribute variables to be passed to fragment shader
 out vec2 fragTexCoord;
+out vec3 outNormal1;
+out vec3 outNormal2;
 
 void main() {
 
@@ -37,24 +39,42 @@ void main() {
     }
 
     // ------ compute world and normalized eye coordinates of our vertex
-    vec4 wPosition4 = skinMatrix * vec4(position, 1.0);
-    gl_Position = projection * view * wPosition4;
+    mat4 Mat = projection * view * skinMatrix;
+    mat4 Mat2 = projection * skinMatrix;
+    gl_Position = Mat * vec4(position, 1.0);
+
+    outNormal1 = mat3(transpose(Mat2)) * inNormal;
+    outNormal2 = mat3(transpose(Mat2)) * inNormal;
 
     fragTexCoord = tex_uv;
 }
 """ % (MAX_VERTEX_BONES, MAX_BONES)
 
+TEXTURE_FRAG = """#version 330 core
+uniform sampler2D diffuseMap;
+in vec2 fragTexCoord;
+in vec3 outNormal1;
+in vec3 outNormal2;
+out vec4 outColor;
+void main() {
+    float p = clamp(dot(normalize(outNormal2), normalize(vec3(0.5, 1, 0.5))), 0, 1);
+    if (dot(outNormal1,vec3(0.5, 1, 0.5)) > 0)
+    {
+        p =  p + 1;
+    }
+    outColor = texture(diffuseMap, fragTexCoord) * (0.5 + p);
+}"""
 
 
-class TexturedSkinnedMesh:
+class SkinnedMesh:
     """class of skinned mesh nodes in scene graph """
-    def __init__(self, texture, attributes, bone_nodes, bone_offsets, index=None):
+    def __init__(self, attributes, bone_nodes, bone_offsets, index=None):
 
         # setup shader attributes for linear blend skinning shader
-        self.textured_mesh = TexturedMesh(texture, attributes, index)
+        self.vertex_array = VertexArray(attributes, index)
 
         # feel free to move this up in Viewer as shown in previous practicals
-        self.skinning_shader = Shader(SKINNING_VERT, TEXTURE_FRAG)
+        self.skinning_shader = Shader(SKINNING_VERT, COLOR_FRAG)
 
         # store skinning data
         self.bone_nodes = bone_nodes
@@ -66,6 +86,12 @@ class TexturedSkinnedMesh:
         shid = self.skinning_shader.glid
         GL.glUseProgram(shid)
 
+        # setup camera geometry parameters
+        loc = GL.glGetUniformLocation(shid, 'projection')
+        GL.glUniformMatrix4fv(loc, 1, True, projection)
+        loc = GL.glGetUniformLocation(shid, 'view')
+        GL.glUniformMatrix4fv(loc, 1, True, view)
+
         # bone world transform matrices need to be passed for skinning
         for bone_id, node in enumerate(self.bone_nodes):
             bone_matrix = node.world_transform @ self.bone_offsets[bone_id]
@@ -73,10 +99,64 @@ class TexturedSkinnedMesh:
             bone_loc = GL.glGetUniformLocation(shid, 'boneMatrix[%d]' % bone_id)
             GL.glUniformMatrix4fv(bone_loc, 1, True, bone_matrix)
 
-        self.textured_mesh.draw(projection, view, _model)
+        # draw mesh vertex array
+        self.vertex_array.draw(GL.GL_TRIANGLES)
 
         # leave with clean OpenGL state, to make it easier to detect problems
         GL.glUseProgram(0)
+    def print_pretty(self, indent="") :
+        print(indent, self)
+
+
+class TexturedSkinnedMesh:
+    """class of skinned mesh nodes in scene graph """
+    def __init__(self, texture, attributes, bone_nodes, bone_offsets, index=None):
+
+        # setup shader attributes for linear blend skinning shader
+        self.vertex_array = VertexArray(attributes, index)
+        self.texture = texture
+
+        # feel free to move this up in Viewer as shown in previous practicals
+        self.skinning_shader = Shader(SKINNING_VERT, TEXTURE_FRAG)
+
+
+        # store skinning data
+        self.bone_nodes = bone_nodes
+        self.bone_offsets = bone_offsets
+
+    def draw(self, projection, view, _model, **_kwargs):
+        """ skinning object draw method """
+
+        shid = self.skinning_shader.glid
+        GL.glUseProgram(shid)
+
+        # setup camera geometry parameters
+        loc = GL.glGetUniformLocation(shid, 'projection')
+        GL.glUniformMatrix4fv(loc, 1, True, projection)
+        loc = GL.glGetUniformLocation(shid, 'view')
+        GL.glUniformMatrix4fv(loc, 1, True, view)
+
+        # bone world transform matrices need to be passed for skinning
+        for bone_id, node in enumerate(self.bone_nodes):
+            bone_matrix = node.world_transform @ self.bone_offsets[bone_id]
+
+            bone_loc = GL.glGetUniformLocation(shid, 'boneMatrix[%d]' % bone_id)
+            GL.glUniformMatrix4fv(bone_loc, 1, True, bone_matrix)
+
+        # texture access setups
+        loc = GL.glGetUniformLocation(shid, 'diffuseMap')
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture.glid)
+        GL.glUniform1i(loc, 0)
+
+        self.vertex_array.draw()
+
+        # leave with clean OpenGL state, to make it easier to detect problems
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+        GL.glUseProgram(0)
+
+    def print_pretty(self, indent="") :
+        print(indent, self)
 
 
 # -------- Skinning Control for Keyframing Skinning Mesh Bone Transforms ------
@@ -147,6 +227,7 @@ def load_textured_skinned(file):
 
     # Note: embedded textures not supported at the moment
     path = os.path.dirname(file)
+    textures=[]
     for mat in scene.materials:
         mat.tokens = dict(reversed(list(mat.properties.items())))
         if 'file' in mat.tokens:  # texture file token
@@ -155,13 +236,14 @@ def load_textured_skinned(file):
             tname = [os.path.join(d[0], f) for d in os.walk(path) for f in d[2]
                      if tname.startswith(f) or f.startswith(tname)]
             if tname:
-                mat.texture = Texture(tname[0])
+                textures.append(Texture(tname[0]))
             else:
                 print('Failed to find texture:', tname)
 
     # ---- create SkinnedMesh objects
     for mesh in scene.meshes:
-        texture = scene.materials[mesh.materialindex].texture
+
+        texture = textures[1]
 
         # tex coords in raster order: compute 1 - y to follow OpenGL convention
         tex_uv = ((0, 1) + mesh.texturecoords[0][:, :2] * (1, -1)

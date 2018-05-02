@@ -89,6 +89,8 @@ class SkinnedMesh:
 
         # leave with clean OpenGL state, to make it easier to detect problems
         GL.glUseProgram(0)
+    def print_pretty(self, indent="") :
+        print(indent, self)
 
 
 # -------- Skinning Control for Keyframing Skinning Mesh Bone Transforms ------

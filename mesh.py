@@ -15,8 +15,6 @@ class VertexArray:
             GL.glEnableVertexAttribArray(layout_index)
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.buffers[layout_index])
             GL.glBufferData(GL.GL_ARRAY_BUFFER, buffer_data, GL.GL_STATIC_DRAW)
-            print(buffer_data)
-            print(buffer_data.shape)
             GL.glVertexAttribPointer(layout_index, buffer_data.shape[1], GL.GL_FLOAT, False, 0, None)
 
         self.size = self.shape = None
