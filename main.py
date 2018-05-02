@@ -12,8 +12,10 @@ from Ground import Ground
 def main():
     """ Run the rendering loop for the scene. """
     viewer = Viewer()
-    meshes = load_textured("cube/cube/cube.obj")
+    meshes = load_textured_skinned("dino/Dinosaurus_walk.dae")
+
     for mesh in meshes:
+        print(mesh)
         viewer.add(mesh)
 
 

@@ -60,6 +60,12 @@ class Node:
         model = model @ self.transform
         for child in self.children:
             child.draw(projection, view, model, **param)
+            
+    def print_pretty(self, indent="") :
+        print(indent, self)
+        for child in self.children:
+            child.print_pretty(indent + "==")
+
 
 class KeyFrameControlNode(Node):
     """ Place node with transform keys above a controlled subtree """

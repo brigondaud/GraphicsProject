@@ -89,10 +89,8 @@ class Skybox:
         """
 
         self.shader = Shader(VERT, FRAG)
-        print (self.shader, self.shader.glid)
-
+        
         self.vertexArray = load("skybox/skybox.obj")[0]
-        print(self.vertexArray)
 
         original =  Image.open(file).resize((4*RESOLUTION,3*RESOLUTION))
         self.texture_id = GL.glGenTextures(1)
