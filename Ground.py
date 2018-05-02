@@ -3,6 +3,7 @@ from texture import Texture
 from PIL import Image
 import numpy as np
 from math import floor
+import operator
 
 G_VERT = """#version 330 core
 uniform mat4 modelviewprojection;
@@ -38,79 +39,27 @@ class Ground:
         self.widthScale = widthScale
         self.heightScale = heightScale
 
-        #Init all the vertices for the ground
-        self.vertexPool = self.initVertexPool()
-
-        #Transform into a mesh
-        self.vertices, self.texels = [], []
-        for vertex, texel in self.iterVertices():
-            self.vertices.append(vertex)
-            self.texels.append(texel)
-
-        #Init the faces
-        self.faces = []
-        for x in range(self.heightMap.size[0]-1):
-            for z in range(self.heightMap.size[1]-1):
-                for triangle in self.generateTile((x, z)):
-                    self.faces.append(triangle)
-                    
-        self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces))
-
-    def initVertexPool(self):
-        """
-        inits the vertex pool
-        """
-        pool = {}
-        for x in range(self.heightMap.size[0]):
-            for z in range(self.heightMap.size[1]):
-                xV = (self.origin[0] + x)*self.widthScale
-                yV = self.heightMap.getpixel((x, z))[0]*self.heightScale
-                zV = (self.origin[1] + z)*self.widthScale
-                pool[(x, z)] = (GroundVertex(xV, yV, zV))
-        return pool
-
-    def generateTile(self, bottomRight):
-        """
-        generates a tile for the ground, giving the bottom right index
-        it is supposed that the bottomRight is correctly given, i.e. that corresponds
-        to a correct bottomRight
-        """
-        bottomTriangle = (self.vertexPool[bottomRight].vertexNumber,
-                          self.vertexPool[bottomRight[0]+1, bottomRight[1]].vertexNumber,
-                          self.vertexPool[bottomRight[0], bottomRight[1]+1].vertexNumber)
-
-        upperTriangle = (self.vertexPool[bottomRight[0]+1, bottomRight[1]].vertexNumber,
-                         self.vertexPool[bottomRight[0]+1, bottomRight[1]+1].vertexNumber,
-                         self.vertexPool[bottomRight[0], bottomRight[1]+1].vertexNumber)
+        #Creating the vertices
+        sizeX = self.heightMap.size[0]
+        sizeZ = self.heightMap.size[1]
+        self.vertices, self.texels, self.faces = [], [], []
+        for z in range(sizeZ):
+            for x in range(sizeX):
+                self.vertices.append(
+                    ((self.origin[0]+x)*self.widthScale,
+                    self.heightMap.getpixel((x, z))[0]*self.heightScale,
+                    (self.origin[1]+z)*self.widthScale)
+                )
+                self.texels.append((x%2, z%2))
         
-        return bottomTriangle, upperTriangle
-
-    def iterVertices(self):
-        """
-        iterates over all the vertices of the vertex pool
-        """ 
-        for _, vertex in self.vertexPool.items():
-            yield vertex.getVertex()
-
-
-class GroundVertex:
-    """
-    utility class to compute the ground mesh
-    """
-    Count = 0
-    def __init__(self, x, y, z):
-        """
-        each vertex is init with it's coordinates and the current vertex count
-        in order to use faces in the ground mesh.
-        """
-        self.x, self.y, self.z, self.vertexNumber = x, y, z, GroundVertex.Count
-        # update the vertex count
-        GroundVertex.Count += 1
-        # corresponding texel
-        self.texel = (x%2, z%2)
-
-    def getVertex(self):
-        """
-        returns the vertex
-        """
-        return (self.x, self.y, self.z), self.texel
+        #Creating the mesh
+        for z in range(sizeZ-1):
+            for x in range(sizeX-1):
+                self.faces.append(
+                    (x + z*sizeX, x + (z+1)*sizeX, (x+1) + z*sizeX)
+                )
+                self.faces.append(
+                    (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
+                )
+        
+        self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
