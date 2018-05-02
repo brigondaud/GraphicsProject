@@ -1,9 +1,13 @@
+import OpenGL.GL as GL              # standard Python OpenGL wrapper
+import glfw                         # lean window system wrapper for OpenGL
 from texture import TexturedMesh
 from texture import Texture
 from PIL import Image
 import numpy as np
 from math import floor
 import operator
+from mesh import VertexArray
+from shader import Shader
 
 G_VERT = """#version 330 core
 uniform mat4 modelviewprojection;
@@ -23,6 +27,24 @@ void main() {
     outColor = vec4(uv_pos, 1);
 }"""
 
+TEXTURE_FRAG = """#version 330 core
+uniform sampler2D diffuseMap;
+in vec2 fragTexCoord;
+out vec4 outColor;
+void main() {
+    outColor = texture(diffuseMap, fragTexCoord);
+}"""
+
+TEXTMESH_VERT = """#version 330 core
+uniform mat4 modelviewprojection;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 tex_uv;
+out vec2 fragTexCoord;
+void main() {
+    gl_Position = modelviewprojection * vec4(position, 1);
+    fragTexCoord = tex_uv;
+}"""
+
 
 class Ground:
     """
@@ -35,9 +57,13 @@ class Ground:
         """
         self.texture = Texture("ground/ground.jpg")
         self.heightMap = Image.open("ground/heightMap.png")
+        
+        self.shader = Shader(TEXTMESH_VERT, TEXTURE_FRAG)
+        
         self.origin = origin
         self.widthScale = widthScale
         self.heightScale = heightScale
+        
         #To access heights for the dinosaur.
         self.heights = {}
 
@@ -65,4 +91,25 @@ class Ground:
                     (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
                 )
         
-        self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
+        self.vertexArray = VertexArray([np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
+
+    def draw(self, projection, view, model, win=None, **_kwargs):
+        """
+        draws the ground using a normal map
+        """
+        GL.glUseProgram(self.shader.glid)
+
+        # projection geometry
+        loc = GL.glGetUniformLocation(self.shader.glid, 'modelviewprojection')
+        GL.glUniformMatrix4fv(loc, 1, True, projection @ view @ model)
+
+        # texture access setups
+        loc = GL.glGetUniformLocation(self.shader.glid, 'diffuseMap')
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture.glid)
+        GL.glUniform1i(loc, 0)
+        self.vertexArray.draw(GL.GL_TRIANGLES)
+
+        # leave clean state for easier debugging
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+        GL.glUseProgram(0)
