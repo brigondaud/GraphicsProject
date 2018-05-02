@@ -1,5 +1,5 @@
-from TexturedMesh import TexturedMesh
-from Texture import Texture
+from texture import TexturedMesh
+from texture import Texture
 from PIL import Image
 import numpy as np
 from math import floor

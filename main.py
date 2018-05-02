@@ -16,6 +16,8 @@ def main():
     for mesh in meshes:
         viewer.add(mesh)
 
+
+    ground = Ground((0, 0), 1, 1)
     # viewer.add(ground.mesh)
 
     viewer.run()
