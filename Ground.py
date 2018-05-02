@@ -38,6 +38,8 @@ class Ground:
         self.origin = origin
         self.widthScale = widthScale
         self.heightScale = heightScale
+        #To access heights for the dinosaur.
+        self.heights = {}
 
         #Creating the vertices
         sizeX = self.heightMap.size[0]
@@ -50,6 +52,7 @@ class Ground:
                     self.heightMap.getpixel((x, z))[0]*self.heightScale,
                     (self.origin[1]+z)*self.widthScale)
                 )
+                self.heights[(x, z)] = self.heightMap.getpixel((x, z))[0]*self.heightScale
                 self.texels.append((x%2, z%2))
         
         #Creating the mesh
