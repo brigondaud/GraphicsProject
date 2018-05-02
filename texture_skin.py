@@ -3,6 +3,7 @@ import pyassimp
 from mesh import *
 from node import *
 from texture import *
+from skinning import SkinningControlNode
 
 # -------------- Linear Blend Skinning : TP7 ---------------------------------
 MAX_VERTEX_BONES = 4
@@ -27,8 +28,7 @@ layout(location = 4) in vec4 bone_weights;
 
 // ----- interpolated attribute variables to be passed to fragment shader
 out vec2 fragTexCoord;
-out vec3 outNormal1;
-out vec3 outNormal2;
+out vec3 outNormal;
 
 void main() {
 
@@ -43,8 +43,7 @@ void main() {
     mat4 Mat2 = projection * skinMatrix;
     gl_Position = Mat * vec4(position, 1.0);
 
-    outNormal1 = mat3(transpose(Mat2)) * inNormal;
-    outNormal2 = mat3(transpose(Mat2)) * inNormal;
+    outNormal = mat3(transpose(Mat2)) * inNormal;
 
     fragTexCoord = tex_uv;
 }
@@ -53,12 +52,11 @@ void main() {
 TEXTURE_FRAG = """#version 330 core
 uniform sampler2D diffuseMap;
 in vec2 fragTexCoord;
-in vec3 outNormal1;
-in vec3 outNormal2;
+in vec3 outNormal;
 out vec4 outColor;
 void main() {
-    float p = clamp(dot(normalize(outNormal2), normalize(vec3(0.5, 1, 0.5))), 0, 1);
-    if (dot(outNormal1,vec3(0.5, 1, 0.5)) > 0)
+    float p = clamp(dot(normalize(outNormal), normalize(vec3(0.5, 1, 0.5))), 0, 1);
+    if (dot(outNormal,vec3(0.5, 1, 0.5)) > 0)
     {
         p =  p + 1;
     }
@@ -157,26 +155,6 @@ class TexturedSkinnedMesh:
 
     def print_pretty(self, indent="") :
         print(indent, self)
-
-
-# -------- Skinning Control for Keyframing Skinning Mesh Bone Transforms ------
-class SkinningControlNode(Node):
-    """ Place node with transform keys above a controlled subtree """
-    def __init__(self, *keys, **kwargs):
-        super().__init__(**kwargs)
-        self.keyframes = TransformKeyFrames(*keys) if keys[0] else None
-        self.world_transform = identity()
-
-    def draw(self, projection, view, model, **param):
-        """ When redraw requested, interpolate our node transform from keys """
-        if self.keyframes:  # no keyframe update should happens if no keyframes
-            self.transform = self.keyframes.value(glfw.get_time())
-
-        # store world transform for skinned meshes using this node as bone
-        self.world_transform = model @ self.transform
-
-        # default node behaviour (call children's draw method)
-        super().draw(projection, view, model, **param)
 
 
 # -------------- 3D resource loader -------------------------------------------

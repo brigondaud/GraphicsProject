@@ -90,7 +90,10 @@ class Viewer:
 
     def on_key(self, _win, key, _scancode, action, _mods):
         """ 'Q' or 'Escape' quits """
-        rotation_step = 5;
+        for drawable in self.drawables:
+            drawable.on_key(_win, key, _scancode, action, _mods)
+        print("in", _win, key, _scancode, action, _mods)
+
         if action == glfw.PRESS or action == glfw.REPEAT:
             if key == glfw.KEY_LEFT:
                 self.y_angle -= rotation_step
@@ -109,7 +112,8 @@ class Viewer:
             if key == glfw.KEY_W:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, next(self.fill_modes))
             if key == glfw.KEY_SPACE:
-                glfw.set_time(0)
+                pass
+                # glfw.set_time(0)
 
 
 

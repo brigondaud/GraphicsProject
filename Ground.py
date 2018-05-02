@@ -49,12 +49,12 @@ class Ground:
             for x in range(sizeX):
                 self.vertices.append(
                     ((self.origin[0]+x)*self.widthScale,
-                    self.heightMap.getpixel((x, z))[0]*self.heightScale,
-                    (self.origin[1]+z)*self.widthScale)
+                    self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale,
+                    (self.origin[2]+z)*self.widthScale)
                 )
                 self.heights[(x, z)] = self.heightMap.getpixel((x, z))[0]*self.heightScale
                 self.texels.append((x%2, z%2))
-        
+
         #Creating the mesh
         for z in range(sizeZ-1):
             for x in range(sizeX-1):
@@ -64,5 +64,5 @@ class Ground:
                 self.faces.append(
                     (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
                 )
-        
+
         self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))

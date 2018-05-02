@@ -93,6 +93,8 @@ class TexturedMesh(VertexArray):
 
     def setShaders(self, vert, frag):
         self.shader = Shader(vert, frag)
+    def on_key(self, _win, key, _scancode, action, _mods):
+        pass
 
 class TexturedPlane:
     """ Simple first textured object """
