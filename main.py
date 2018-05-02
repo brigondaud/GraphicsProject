@@ -4,14 +4,16 @@ import OpenGL.GL as GL
 import glfw
 from viewer import Viewer
 from skybox import Skybox
+from texture import *
+from skinning import *
+from texture_skin import *
 from Ground import Ground
 
 def main():
     """ Run the rendering loop for the scene. """
     viewer = Viewer()
-    sky = Skybox()
-    ground = Ground((0, 0), 1, 0.2)
-    for mesh in sky.getMeshes():
+    meshes = load_textured("cube/cube/cube.obj")
+    for mesh in meshes:
         viewer.add(mesh)
 
     # viewer.add(ground.mesh)
