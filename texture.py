@@ -91,6 +91,9 @@ class TexturedMesh(VertexArray):
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
         GL.glUseProgram(0)
 
+    def setShaders(self, vert, frag):
+        self.shader = Shader(vert, frag)
+
 class TexturedPlane:
     """ Simple first textured object """
 
