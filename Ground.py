@@ -41,7 +41,7 @@ class Ground:
         self.terrainHeights = []
 
         self.vertexPool = self.initVertexPool()
-        
+
         # self.groundAttributes, self.groundIndexes = self.generateGroundMesh()
 
         # self.mesh = TexturedMesh(self.texture, self.groundAttributes, self.groundIndexes)
@@ -59,12 +59,15 @@ class Ground:
                 pool[(x, z)] = (GroundVertex(xV, yV, zV))
         return pool
 
-    def generateTile(self, bottomRight, image):
+    def generateTile(self, bottomRight):
         """
         generates a tile for the ground, giving the bottom right index
+        it is supposed that the bottomRight is correctly given, i.e. that corresponds
+        to a correct bottomRight
         """
         mesh, texels, faces = [], [], []
         #Generates the four
+
 
     def generateGroundMesh(self):
         """
