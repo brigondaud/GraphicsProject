@@ -38,13 +38,23 @@ class Ground:
         self.widthScale = widthScale
         self.heightScale = heightScale
 
-        self.terrainHeights = []
-
+        #Init all the vertices for the ground
         self.vertexPool = self.initVertexPool()
 
-        # self.groundAttributes, self.groundIndexes = self.generateGroundMesh()
+        #Transform into a mesh
+        self.vertices, self.texels = [], []
+        for vertex, texel in self.iterVertices():
+            self.vertices.append(vertex)
+            self.texels.append(texel)
 
-        # self.mesh = TexturedMesh(self.texture, self.groundAttributes, self.groundIndexes)
+        #Init the faces
+        self.faces = []
+        for x in range(self.heightMap.size[0]-1):
+            for z in range(self.heightMap.size[1]-1):
+                for triangle in self.generateTile((x, z)):
+                    self.faces.append(triangle)
+        
+        self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces))
 
     def initVertexPool(self):
         """
@@ -65,41 +75,23 @@ class Ground:
         it is supposed that the bottomRight is correctly given, i.e. that corresponds
         to a correct bottomRight
         """
-        mesh, texels, faces = [], [], []
-        #Generates the four
+        bottomTriangle = (self.vertexPool[bottomRight].vertexNumber,
+                          self.vertexPool[bottomRight[0]+1, bottomRight[1]].vertexNumber,
+                          self.vertexPool[bottomRight[0], bottomRight[1]+1].vertexNumber)
 
+        upperTriangle = (self.vertexPool[bottomRight[0]+1, bottomRight[1]].vertexNumber,
+                         self.vertexPool[bottomRight[0]+1, bottomRight[1]+1].vertexNumber,
+                         self.vertexPool[bottomRight[0], bottomRight[1]+1].vertexNumber)
+        
+        return bottomTriangle, upperTriangle
 
-    def generateGroundMesh(self):
+    def iterVertices(self):
         """
-        generates the ground mesh
-        """
-        # xStep = (self.xmax - self.xmin)/self.resolution
-        # zStep = (self.zmax - self.zmin)/self.resolution
+        iterates over all the vertices of the vertex pool
+        """ 
+        for _, vertex in self.vertexPool.items():
+            yield vertex.getVertex()
 
-        # xMapStep = self.heightMap.size[0]/self.resolution
-        # yMapStep = self.heightMap.size[1]/self.resolution
-
-        texels, faces = [], []
-
-        # #Creating the ground mesh and the texels
-        # for i in range(self.resolution):
-        #     for j in range(self.resolution):
-        #         heightValue = self.heightMap.getpixel((floor(i*xMapStep), floor(j*yMapStep)))
-        #         heightValue *= self.scale
-        #         self.terrainHeights.append((self.xmin + i*xStep, heightValue, self.zmin + j*zStep))
-        #         texels.append((i%2, j%2))
-
-        #Creating the faces
-        # for i in range(self.resolution-1):
-        #     for j in range(self.resolution-1):
-        #         faces.append((self.resolution*i, self.resolution*(i+1), self.resolution*i+1))
-
-
-
-        attributes = [np.array(self.terrainHeights), np.array(texels)]
-        faces = np.array(faces)
-
-        return attributes, faces
 
 class GroundVertex:
     """
@@ -116,3 +108,9 @@ class GroundVertex:
         GroundVertex.Count += 1
         # corresponding texel
         self.texel = (x%2, z%2)
+
+    def getVertex(self):
+        """
+        returns the vertex
+        """
+        return (self.x, self.y, self.z), self.texel
