@@ -53,7 +53,7 @@ class Ground:
             for z in range(self.heightMap.size[1]-1):
                 for triangle in self.generateTile((x, z)):
                     self.faces.append(triangle)
-        
+                    
         self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces))
 
     def initVertexPool(self):
@@ -64,7 +64,7 @@ class Ground:
         for x in range(self.heightMap.size[0]):
             for z in range(self.heightMap.size[1]):
                 xV = (self.origin[0] + x)*self.widthScale
-                yV = self.heightMap.getpixel((x, z))*self.heightScale
+                yV = self.heightMap.getpixel((x, z))[0]*self.heightScale
                 zV = (self.origin[1] + z)*self.widthScale
                 pool[(x, z)] = (GroundVertex(xV, yV, zV))
         return pool
