@@ -45,7 +45,6 @@ in vec3 normal;
 out vec4 outColor;
 void main() {
     outColor = vec4(color * dot(normalize(normal), vec3(0, -1, -0.25)), 1);
-
 }"""
 
 

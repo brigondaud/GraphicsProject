@@ -12,39 +12,26 @@ from shader import Shader
 G_VERT = """#version 330 core
 uniform mat4 modelviewprojection;
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 color;
-out vec3 uv_pos;
+layout(location = 1) in vec2 tex_uv;
+out vec2 uvCoords;
 void main() {
     gl_Position = modelviewprojection * vec4(position, 1);
-    uv_pos = color;
+    uvCoords = tex_uv;
 }"""
 
 G_FRAG = """#version 330 core
 uniform sampler2D diffuseMap;
-in vec3 uv_pos;
+uniform sampler2D normalMap;
+
+in vec2 uvCoords;
 out vec4 outColor;
 void main() {
-    outColor = vec4(uv_pos, 1);
-}"""
+    
+    // Get the normal in the normal map and normalize to have it between 0 and 1
+    vec3 normal = normalize((texture(normalMap, uvCoords).rgb)*2.0-1.0);
 
-TEXTURE_FRAG = """#version 330 core
-uniform sampler2D diffuseMap;
-in vec2 fragTexCoord;
-out vec4 outColor;
-void main() {
-    outColor = texture(diffuseMap, fragTexCoord);
+    outColor = vec4(texture(diffuseMap, uvCoords).rgb * dot(normal, vec3(0, 1, 0.5)), 1);
 }"""
-
-TEXTMESH_VERT = """#version 330 core
-uniform mat4 modelviewprojection;
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec2 tex_uv;
-out vec2 fragTexCoord;
-void main() {
-    gl_Position = modelviewprojection * vec4(position, 1);
-    fragTexCoord = tex_uv;
-}"""
-
 
 class Ground:
     """
@@ -55,10 +42,13 @@ class Ground:
         """
         init the mesh that represents the ground
         """
+
+        #Textures and height map
         self.texture = Texture("ground/ground.jpg")
+        self.normalMap = Texture("ground/normal.jpg")
         self.heightMap = Image.open("ground/heightMap.png")
         
-        self.shader = Shader(TEXTMESH_VERT, TEXTURE_FRAG)
+        self.shader = Shader(G_VERT, G_FRAG)
         
         self.origin = origin
         self.widthScale = widthScale
@@ -90,6 +80,10 @@ class Ground:
                 self.faces.append(
                     (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
                 )
+
+                #Creating the normals for each triangle
+                
+        
         
         self.vertexArray = VertexArray([np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
 
@@ -103,11 +97,21 @@ class Ground:
         loc = GL.glGetUniformLocation(self.shader.glid, 'modelviewprojection')
         GL.glUniformMatrix4fv(loc, 1, True, projection @ view @ model)
 
-        # texture access setups
+        # Texture and normal mapping
         loc = GL.glGetUniformLocation(self.shader.glid, 'diffuseMap')
+        GL.glUniform1i(loc, 0)
+
+        loc = GL.glGetUniformLocation(self.shader.glid, 'normalMap')
+        GL.glUniform1i(loc, 1)
+
         GL.glActiveTexture(GL.GL_TEXTURE0)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture.glid)
-        GL.glUniform1i(loc, 0)
+
+        GL.glActiveTexture(GL.GL_TEXTURE1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.normalMap.glid)
+
+
+        #Draw the vertex array
         self.vertexArray.draw(GL.GL_TRIANGLES)
 
         # leave clean state for easier debugging
