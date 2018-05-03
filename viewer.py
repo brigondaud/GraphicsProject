@@ -17,7 +17,6 @@ from PIL import Image
 from transform import (quaternion_slerp, quaternion_matrix, quaternion,
                        quaternion_from_euler, lookat)
 from loader import *
-from shapes import *
 from node import*
 from skybox import Skybox
 
