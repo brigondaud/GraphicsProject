@@ -30,14 +30,13 @@ void main() {
     // Get the normal in the normal map and normalize to have it between 0 and 1
     vec3 normal = normalize((texture(normalMap, uvCoords).rgb)*2.0-1.0);
 
-    outColor = vec4(texture(diffuseMap, uvCoords).rgb * dot(normal, vec3(0, 1, 0.5)), 1);
+    outColor = vec4(texture(diffuseMap, uvCoords).rgb * dot(normal, vec3(0, 1, 1)), 1);
 }"""
 
 class Ground:
     """
     non flat ground in the scene
     """
-
     def __init__(self, origin, widthScale, heightScale):
         """
         init the mesh that represents the ground
@@ -57,7 +56,7 @@ class Ground:
         #To access heights for the dinosaur.
         self.heights = {}
 
-        #Creating the vertices
+        #Creating the vertices and attributes
         sizeX = self.heightMap.size[0]
         sizeZ = self.heightMap.size[1]
         self.vertices, self.texels, self.faces = [], [], []
@@ -71,7 +70,7 @@ class Ground:
                 self.heights[(x, z)] = self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale
                 self.texels.append((x%2, z%2))
 
-        #Creating the mesh
+        #Creating the faces
         for z in range(sizeZ-1):
             for x in range(sizeX-1):
                 self.faces.append(
@@ -79,14 +78,9 @@ class Ground:
                 )
                 self.faces.append(
                     (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
-                )
-
-
-        #Creating the normals for each triangle
-        #TODO
+                )       
         
-        
-        self.vertexArray = VertexArray([np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
+        self.array = VertexArray([np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
 
     def draw(self, projection, view, model, win=None, **_kwargs):
         """
@@ -113,7 +107,7 @@ class Ground:
 
 
         #Draw the vertex array
-        self.vertexArray.draw(GL.GL_TRIANGLES)
+        self.array.draw(GL.GL_TRIANGLES)
 
         # leave clean state for easier debugging
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)

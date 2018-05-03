@@ -19,10 +19,10 @@ class Dino:
         self.model = identity()
         self.ground = ground
 
-
     def draw(self, projection, view, model, **param):
         """ When redraw requested, interpolate our node transform from keys """
         self.mesh.draw(projection, view, model @ self.model, **param)
+
     def move(self,key):
         angle = [0, 270, 180, 90][self.direction]
 
@@ -31,11 +31,11 @@ class Dino:
         elif key == glfw.KEY_RIGHT:
             self.direction = (self.direction + 1) % 4
 
-        dir = np.array([[0, 0, -1], [1, 0, 0], [0, 0, 1], [-1, 0, 0]])[self.direction]
+        direction = np.array([[0, 0, -1], [1, 0, 0], [0, 0, 1], [-1, 0, 0]])[self.direction]
         old_slope = self.slope
 
         start = vec(self.xyz)
-        self.xyz += dir*3
+        self.xyz += direction*3
         self.xyz[1] = self.ground.getHeight(self.xyz[0]/3, self.xyz[2]/3)
 
         self.slope = self.ground.getSlope(start[0]/3, start[2]/3, self.xyz[0]/3, self.xyz[2]/3)
@@ -64,11 +64,11 @@ def main():
     viewer = Viewer()
 
     ground = Ground((-100,-120, -100), 3, 0.8)
-
+    viewer.add(ground)
+    
     dino = Dino(ground)
     viewer.add(dino)
 
-    viewer.add(ground)
     viewer.run(dino)
 
 if __name__ == '__main__':
