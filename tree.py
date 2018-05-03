@@ -1,5 +1,6 @@
 from loader import loadColorMesh
 from node import Node
+from transform import translate
 
 class Tree:
 	"""
@@ -9,7 +10,7 @@ class Tree:
 		"""
 		init the tree and put it in the correct place
 		"""
-		self.node = Node()
+		self.node = Node(transform=translate(x, y, z))
 		self.meshes = loadColorMesh("tree/tree.obj", )
 		for mesh in self.meshes:
 			self.node.add(mesh)
