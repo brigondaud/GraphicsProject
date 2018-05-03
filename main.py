@@ -8,6 +8,7 @@ from texture import *
 from skinning import *
 from texture_skin import *
 from Ground import Ground
+from control import Control
 from dino import Dino
 from tree import Tree
 import numpy as np
@@ -31,6 +32,10 @@ def main():
                 trees.append(tree)
                 viewer.add(tree.node)
     
+
+    control = Control()
+    viewer.add(control)
+
     dino = Dino(ground)
     viewer.add(dino)
 
