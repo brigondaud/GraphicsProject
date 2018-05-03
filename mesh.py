@@ -42,26 +42,37 @@ class VertexArray:
 
 
 COLOR_VERT = """#version 330 core
-uniform mat4 Mat;
+uniform mat4 projection;
+uniform mat4 view;
 uniform vec3 inColor;
 
 layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
 out vec3 color;
+out vec3 outNormal;
 void main() {
-    gl_Position = Mat * vec4(position, 1);
+    gl_Position = projection * view * vec4(position, 1);
     color = inColor;
+    outNormal = normal;
 }"""
 
 COLOR_FRAG = """#version 330 core
+in vec3 outNormal;
 in vec3 color;
 out vec4 outColor;
 void main() {
-    outColor = vec4(color, 1);
+    float p = 0;
+    if (dot(outNormal,vec3(0.5, 1, 0.5)) > 0)
+    {
+        p = 1;
+    }
+    outColor = vec4(color, 1) * (0.5 + p);
 
 }"""
 
+
 class ColorMesh (VertexArray):
-    
+
     def __init__(self, attributes, color, index=None):
         super().__init__(attributes, index)
         self.shader = Shader(COLOR_VERT, COLOR_FRAG)
@@ -69,8 +80,10 @@ class ColorMesh (VertexArray):
 
     def draw(self, projection, view, model, **param):
         GL.glUseProgram(self.shader.glid)
-        matrix_location = GL.glGetUniformLocation(self.shader.glid, 'Mat')
-        GL.glUniformMatrix4fv(matrix_location, 1, True, projection @ view @ model)
+        matrix_location = GL.glGetUniformLocation(self.shader.glid, 'projection')
+        GL.glUniformMatrix4fv(matrix_location, 1, True, projection)
+        matrix_location = GL.glGetUniformLocation(self.shader.glid, 'view')
+        GL.glUniformMatrix4fv(matrix_location, 1, True, view @ model)
         loc = GL.glGetUniformLocation(self.shader.glid, 'inColor')
         GL.glUniform3fv(loc, 1, self.color)
         super().draw()

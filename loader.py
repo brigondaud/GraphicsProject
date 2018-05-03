@@ -33,7 +33,7 @@ def loadColorMesh(file):
         color = scene.materials[mesh.materialindex].properties["diffuse"]
 
         # create the textured mesh object from texture, attributes, and indices
-        meshes.append(ColorMesh([mesh.vertices], color, index=mesh.faces))
+        meshes.append(ColorMesh([mesh.vertices, mesh.normals], color, index=mesh.faces))
 
     size = sum((mesh.faces.shape[0] for mesh in scene.meshes))
     print('Loaded %s\t(%d meshes, %d faces)' % (file, len(scene.meshes), size))
