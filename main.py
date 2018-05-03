@@ -69,7 +69,7 @@ def main():
     dino = Dino(ground)
     viewer.add(dino)
 
-    viewer.run(dino)
+    # viewer.run(dino)
 
 if __name__ == '__main__':
     glfw.init()
