@@ -60,11 +60,7 @@ void main() {
     vec3 normal = normalize((texture(normalMap, uvCoords).rgb)*2.0-1.0);
 
     float p = clamp(dot(normalize(normal), normalize(light)), 0, 1);
-    if (dot(normal, light) > 0)
-    {
-        p =  p + 1;
-    }
-    outColor = texture(diffuseMap, uvCoords) * (0.1 + p);
+    outColor = texture(diffuseMap, uvCoords) * p;
 }"""
 
 class Ground:
