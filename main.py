@@ -26,7 +26,7 @@ def main():
     trees = []
     for x, z in ground.iterPos():
         if(not(x%10) and not(z%10)): #generating
-            if(np.random.uniform() > 0.5):
+            if(np.random.uniform() > 0.75):
                 tree = Tree(x*widthScale, ground.getHeight(x, z)+2, z*widthScale)
                 trees.append(tree)
                 viewer.add(tree.node)
