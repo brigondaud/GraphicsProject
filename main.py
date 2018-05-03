@@ -14,28 +14,28 @@ class Dino:
     def __init__(self, ground, *keys, **kwargs):
         self.mesh = load_textured_skinned("dino/Dinosaurus_walk.dae")[0]
         self.xyz = np.array([0,ground.getHeight(0, 0),0])
-        self.dir = 0
+        self.direction = 0
         self.slope = 0
         self.model = identity()
         self.ground = ground
 
-
     def draw(self, projection, view, model, **param):
         """ When redraw requested, interpolate our node transform from keys """
         self.mesh.draw(projection, view, model @ self.model, **param)
+
     def move(self,key):
-        angle = [0, 270, 180, 90][self.dir]
+        angle = [0, 270, 180, 90][self.direction]
 
         if key == glfw.KEY_LEFT:
-            self.dir = (self.dir - 1 + 4) % 4
+            self.direction = (self.direction - 1 + 4) % 4
         elif key == glfw.KEY_RIGHT:
-            self.dir = (self.dir + 1) % 4
+            self.direction = (self.direction + 1) % 4
 
-        dir = np.array([[0, 0, -1], [1, 0, 0], [0, 0, 1], [-1, 0, 0]])[self.dir]
+        direction = np.array([[0, 0, -1], [1, 0, 0], [0, 0, 1], [-1, 0, 0]])[self.direction]
         old_slope = self.slope
 
         start = vec(self.xyz)
-        self.xyz += dir*3
+        self.xyz += direction*3
         self.xyz[1] = self.ground.getHeight(self.xyz[0]/3, self.xyz[2]/3)
 
         self.slope = self.ground.getSlope(start[0]/3, start[2]/3, self.xyz[0]/3, self.xyz[2]/3)
@@ -63,9 +63,9 @@ def main():
     """ Run the rendering loop for the scene. """
     viewer = Viewer()
 
-    ground = Ground((-100,-120 , -100), 3, 0.8)
-    viewer.add(ground.mesh)
-
+    ground = Ground((-100,-120, -100), 3, 0.8)
+    viewer.add(ground)
+    
     dino = Dino(ground)
     viewer.add(dino)
 
