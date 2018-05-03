@@ -67,7 +67,7 @@ class Ground:
                     self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale,
                     (self.origin[2]+z)*self.widthScale)
                 )
-                self.heights[(x, z)] = self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale
+                self.heights[(x, z)] = self.heightMap.getpixel((x, z))[0]*self.heightScale
                 self.texels.append((x%2, z%2))
 
         #Creating the faces
@@ -94,17 +94,14 @@ class Ground:
 
         # Texture and normal mapping
         loc = GL.glGetUniformLocation(self.shader.glid, 'diffuseMap')
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture.glid)
         GL.glUniform1i(loc, 0)
 
         loc = GL.glGetUniformLocation(self.shader.glid, 'normalMap')
-        GL.glUniform1i(loc, 1)
-
-        GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture.glid)
-
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.normalMap.glid)
-
+        GL.glUniform1i(loc, 1)
 
         #Draw the vertex array
         self.array.draw(GL.GL_TRIANGLES)
