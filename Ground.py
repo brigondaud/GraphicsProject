@@ -121,8 +121,9 @@ class Ground:
 
     def on_key(self, _win, key, _scancode, action, _mods):
         """
-        do not catch any event
+        catch no event
         """
+        pass
         
 
     def getHeight(self, x, z):
