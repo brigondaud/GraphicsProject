@@ -160,6 +160,7 @@ def load_textured(file):
     # Note: embedded textures not supported at the moment
     path = os.path.dirname(file)
     for mat in scene.materials:
+        print(mat)
         mat.tokens = dict(reversed(list(mat.properties.items())))
         if 'file' in mat.tokens:  # texture file token
             tname = mat.tokens['file'].split('/')[-1].split('\\')[-1]

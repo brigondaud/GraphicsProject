@@ -53,13 +53,19 @@ class Node:
         """ Add drawables to this node, simply updating children list """
         self.children.extend(drawables)
 
-    def draw(self, projection, view, model, **param):
+    def draw(self, projection, view, model, win=None, **param):
         """ Recursive draw, passing down named parameters & model matrix. """
         # merge named parameters given at initialization with those given here
         param = dict(param, **self.param)
         model = model @ self.transform
         for child in self.children:
             child.draw(projection, view, model, **param)
+
+    def on_key(self, _win, key, _scancode, action, _mods):
+        """
+        catch no event
+        """
+        pass
 
     def print_pretty(self, indent="") :
         print(indent, self)

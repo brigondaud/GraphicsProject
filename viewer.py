@@ -15,7 +15,7 @@ import pyassimp                     # 3D ressource loader
 import pyassimp.errors              # assimp error management + exceptions
 from PIL import Image
 from transform import (quaternion_slerp, quaternion_matrix, quaternion,
-                       quaternion_from_euler)
+                       quaternion_from_euler, lookat)
 from loader import *
 from shapes import *
 from node import*
@@ -69,6 +69,7 @@ class Viewer:
 
             winsize = glfw.get_window_size(self.win)
             view =  self.trackball.view_matrix()
+            # view = lookat(np.array((0, 0, 0)), observable.mesh.)
             projection = self.trackball.projection_matrix(winsize)
             model =  np.linalg.inv(observable.mesh.transform) @ translate(0, -4, -6)
 
@@ -76,7 +77,7 @@ class Viewer:
                 self.skybox.drawskybox(projection, view)
 
             for drawable in self.drawables:
-                drawable.draw(projection, view, model, win=self.win, color=(0, 1, 0, 1))
+                drawable.draw(projection, view, model, win=self.win)
 
             # flush render commands, and swap draw buffers
             glfw.swap_buffers(self.win)

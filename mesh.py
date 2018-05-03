@@ -41,15 +41,38 @@ class VertexArray:
         GL.glDeleteBuffers(1, self.buffers)
 
 
+COLOR_VERT = """#version 330 core
+uniform mat4 Mat;
+uniform vec3 inColor;
 
+layout(location = 0) in vec3 position;
+out vec3 color;
+void main() {
+    gl_Position = Mat * vec4(position, 1);
+    color = inColor;
+}"""
+
+COLOR_FRAG = """#version 330 core
+in vec3 color;
+out vec4 outColor;
+void main() {
+    outColor = vec4(color, 1);
+
+}"""
 
 class ColorMesh (VertexArray):
-    def draw(self, projection, view, model, color_shader=None, color=(1, 1, 1), **param):
-        GL.glUseProgram(color_shader.glid)
-        matrix_location = GL.glGetUniformLocation(color_shader.glid, 'Mat')
+    
+    def __init__(self, attributes, color, index=None):
+        super().__init__(attributes, index)
+        self.shader = Shader(COLOR_VERT, COLOR_FRAG)
+        self.color = color
+
+    def draw(self, projection, view, model, **param):
+        GL.glUseProgram(self.shader.glid)
+        matrix_location = GL.glGetUniformLocation(self.shader.glid, 'Mat')
         GL.glUniformMatrix4fv(matrix_location, 1, True, projection @ view @ model)
-        color_location = GL.glGetUniformLocation(color_shader.glid, 'inColor')
-        GL.glUniform3fv(color_location, 1, color)
+        loc = GL.glGetUniformLocation(self.shader.glid, 'inColor')
+        GL.glUniform3fv(loc, 1, self.color)
         super().draw()
 
 class PhongMesh (ColorMesh):
