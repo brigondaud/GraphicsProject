@@ -67,9 +67,9 @@ class Viewer:
             # draw our scene objects
 
             winsize = glfw.get_window_size(self.win)
-            view = translate(0, -250, -1500) @ self.trackball.view_matrix() @ np.linalg.inv(observable.mesh.transform)
+            view = self.trackball.view_matrix()
             projection = self.trackball.projection_matrix(winsize)
-            model = identity()
+            model = translate(0, -100, -100) @ np.linalg.inv(observable.mesh.transform)
 
             if self.skybox is not None:
                 self.skybox.drawskybox(projection, view)
