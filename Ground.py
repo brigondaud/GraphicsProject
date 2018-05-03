@@ -87,16 +87,16 @@ class Ground:
         self.heights = {}
 
         #Creating the vertices and attributes
-        sizeX = self.heightMap.size[0]
-        sizeZ = self.heightMap.size[1]
+        self.sizeX = self.heightMap.size[0]
+        self.sizeZ = self.heightMap.size[1]
 
         self.vertices, self.texels, self.faces = [], [], []
-        self.normals = [np.array((0, 0, 0), dtype=float)]*sizeX*sizeZ
-        self.tangents = [np.array((0, 0, 0), dtype=float)]*sizeX*sizeZ
-        self.bitangents = [np.array((0, 0, 0), dtype=float)]*sizeX*sizeZ
+        self.normals = [np.array((0, 0, 0), dtype=float)]*self.sizeX*self.sizeZ
+        self.tangents = [np.array((0, 0, 0), dtype=float)]*self.sizeX*self.sizeZ
+        self.bitangents = [np.array((0, 0, 0), dtype=float)]*self.sizeX*self.sizeZ
         
-        for z in range(sizeZ):
-            for x in range(sizeX):
+        for z in range(self.sizeZ):
+            for x in range(self.sizeX):
                 
                 #Vertex
                 vertex = ((self.origin[0]+x)*self.widthScale,
@@ -112,13 +112,13 @@ class Ground:
 
 
         #Creating the faces
-        for z in range(sizeZ-1):
-            for x in range(sizeX-1):
+        for z in range(self.sizeZ-1):
+            for x in range(self.sizeX-1):
                 self.faces.append(
-                    (x + z*sizeX, x + (z+1)*sizeX, (x+1) + z*sizeX)
+                    (x + z*self.sizeX, x + (z+1)*self.sizeX, (x+1) + z*self.sizeX)
                 )
                 self.faces.append(
-                    (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
+                    (x + (z+1)*self.sizeX, (x+1) + (z+1)*self.sizeX, (x+1) + z*self.sizeX)
                 )
 
         #Computing normals, tangent and bitangents for normal mapping purpose.
@@ -198,3 +198,11 @@ class Ground:
 
     def getSlope(self, x0, z0, x1, z1):
         return - np.arcsin((self.getHeight(x1, z1) - self.getHeight(x0, z0))/(255*self.heightScale))/np.pi * 180
+
+    def iterPos(self):
+        """
+        iterates on all the position of the map (int, int)
+        """
+        for z in range(self.sizeZ):
+            for x in range(self.sizeX):
+                yield self.origin[0] + x, self.origin[2] + z
