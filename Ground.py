@@ -66,3 +66,9 @@ class Ground:
                 )
 
         self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
+
+    def getHeight(self, x, z):
+        return self.origin[1] + self.heights[(x - self.origin[0], z - self.origin[2])]
+
+    def getSlope(self, x0, z0, x1, z1):
+        return - np.arcsin((self.getHeight(x1, z1) - self.getHeight(x0, z0))/(255*self.heightScale))/np.pi * 180
