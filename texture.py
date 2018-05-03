@@ -9,7 +9,7 @@ from mesh import *
 # -------------- OpenGL Texture Wrapper ---------------------------------------
 class Texture:
     """ Helper class to create and automatically destroy textures """
-    def __init__(self, file, wrap_mode=GL.GL_REPEAT, min_filter=GL.GL_LINEAR,
+    def __init__(self, file, wrap_mode=GL.GL_MIRRORED_REPEAT, min_filter=GL.GL_LINEAR,
                  mag_filter=GL.GL_LINEAR_MIPMAP_LINEAR):
         self.glid = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.glid)
@@ -93,6 +93,8 @@ class TexturedMesh(VertexArray):
 
     def setShaders(self, vert, frag):
         self.shader = Shader(vert, frag)
+    def on_key(self, _win, key, _scancode, action, _mods):
+        pass
 
 class TexturedPlane:
     """ Simple first textured object """

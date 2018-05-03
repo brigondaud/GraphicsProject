@@ -100,17 +100,28 @@ class SkinningControlNode(Node):
         super().__init__(**kwargs)
         self.keyframes = TransformKeyFrames(*keys) if keys[0] else None
         self.world_transform = identity()
+        self.time = 0;
+
 
     def draw(self, projection, view, model, **param):
         """ When redraw requested, interpolate our node transform from keys """
         if self.keyframes:  # no keyframe update should happens if no keyframes
-            self.transform = self.keyframes.value(glfw.get_time())
+            self.transform = self.keyframes.value(glfw.get_time() - self.time)
 
         # store world transform for skinned meshes using this node as bone
         self.world_transform = model @ self.transform
 
         # default node behaviour (call children's draw method)
         super().draw(projection, view, model, **param)
+
+    def on_key(self, _win, key, _scancode, action, _mods):
+        pass
+
+    def reset_time(self):
+        self.time = glfw.get_time()
+        for child in self.children:
+            if type(child) is SkinningControlNode:
+                child.reset_time()
 
 
 # -------------- Deformable Cylinder Mesh  ------------------------------------

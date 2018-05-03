@@ -11,7 +11,7 @@ class KeyFrames:
         keyframes = sorted(((key[0], key[1]) for key in time_value_pairs))
         self.times, self.values = zip(*keyframes)  # pairs list -> 2 lists
         self.interpolate = interpolation_function
-
+    
     def value(self, time):
         """ Computes interpolated value from keyframes, for a given time """
 
@@ -60,7 +60,7 @@ class Node:
         model = model @ self.transform
         for child in self.children:
             child.draw(projection, view, model, **param)
-            
+
     def print_pretty(self, indent="") :
         print(indent, self)
         for child in self.children:

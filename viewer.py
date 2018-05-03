@@ -59,7 +59,7 @@ class Viewer:
         # initially empty list of object to draw
         self.drawables = []
 
-    def run(self):
+    def run(self, observable):
         """ Main render loop for this OpenGL window """
         while not glfw.window_should_close(self.win):
             # clear draw buffer
@@ -68,9 +68,9 @@ class Viewer:
             # draw our scene objects
 
             winsize = glfw.get_window_size(self.win)
-            view = self.trackball.view_matrix()
+            view =  self.trackball.view_matrix()
             projection = self.trackball.projection_matrix(winsize)
-            model = rotate(vect(0,1,0), self.y_angle) @ rotate(vect(1, 0, 0), self.x_angle)
+            model =  np.linalg.inv(observable.mesh.transform) @ translate(0, -4, -6)
 
             if self.skybox is not None:
                 self.skybox.drawskybox(projection, view)
@@ -90,26 +90,18 @@ class Viewer:
 
     def on_key(self, _win, key, _scancode, action, _mods):
         """ 'Q' or 'Escape' quits """
-        rotation_step = 5;
+        rotation_step = 5
+        for drawable in self.drawables:
+            drawable.on_key(_win, key, _scancode, action, _mods)
+
         if action == glfw.PRESS or action == glfw.REPEAT:
-            if key == glfw.KEY_LEFT:
-                self.y_angle -= rotation_step
-                self.y_angle %= 360
-            elif key == glfw.KEY_RIGHT:
-                self.y_angle += rotation_step
-                self.y_angle %= 360
-            if key == glfw.KEY_UP:
-                self.x_angle += rotation_step
-                self.x_angle %= 360
-            elif key == glfw.KEY_DOWN:
-                self.x_angle -= rotation_step
-                self.x_angle %= 360
             if key == glfw.KEY_ESCAPE or key == glfw.KEY_Q:
                 glfw.set_window_should_close(self.win, True)
             if key == glfw.KEY_W:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, next(self.fill_modes))
             if key == glfw.KEY_SPACE:
-                glfw.set_time(0)
+                pass
+                # glfw.set_time(0)
 
 
 
