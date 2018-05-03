@@ -8,6 +8,7 @@ from texture import *
 from skinning import *
 from texture_skin import *
 from Ground import Ground
+from control import Control
 
 class Dino:
     """ Place node with transform keys above a controlled subtree """
@@ -65,7 +66,10 @@ def main():
 
     ground = Ground((-100,-120, -100), 3, 0.8)
     viewer.add(ground)
-    
+
+    control = Control()
+    viewer.add(control)
+
     dino = Dino(ground)
     viewer.add(dino)
 

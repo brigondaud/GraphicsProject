@@ -136,7 +136,7 @@ def main():
     base_shape = Node(transform=identity(), children=[cylinder])
     # viewer.add(base_node)
 
-    #viewer.add(TexturedPlane("grass.png"))
+    viewer.add(TexturedPlane("control/arrows.png"))
 
     # viewer.add(Cylinder(200))
 
