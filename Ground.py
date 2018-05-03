@@ -68,7 +68,7 @@ class Ground:
                     self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale,
                     (self.origin[2]+z)*self.widthScale)
                 )
-                self.heights[(x, z)] = self.heightMap.getpixel((x, z))[0]*self.heightScale
+                self.heights[(x, z)] = self.origin[1] + self.heightMap.getpixel((x, z))[0]*self.heightScale
                 self.texels.append((x%2, z%2))
 
         #Creating the mesh
@@ -81,17 +81,9 @@ class Ground:
                     (x + (z+1)*sizeX, (x+1) + (z+1)*sizeX, (x+1) + z*sizeX)
                 )
 
-        self.mesh = TexturedMesh(self.texture, [np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
 
-    def getHeight(self, x, z):
-        return self.origin[1] + self.heights[(x - self.origin[0], z - self.origin[2])]
-
-    def getSlope(self, x0, z0, x1, z1):
-        return - np.arcsin((self.getHeight(x1, z1) - self.getHeight(x0, z0))/(255*self.heightScale))/np.pi * 180
-
-
-                #Creating the normals for each triangle
-                
+        #Creating the normals for each triangle
+        #TODO
         
         
         self.vertexArray = VertexArray([np.array(self.vertices), np.array(self.texels)], np.array(self.faces, dtype=np.uint32))
@@ -126,3 +118,15 @@ class Ground:
         # leave clean state for easier debugging
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
         GL.glUseProgram(0)
+
+    def on_key(self, _win, key, _scancode, action, _mods):
+        """
+        do not catch any event
+        """
+        
+
+    def getHeight(self, x, z):
+        return self.origin[1] + self.heights[(x - self.origin[0], z - self.origin[2])]
+
+    def getSlope(self, x0, z0, x1, z1):
+        return - np.arcsin((self.getHeight(x1, z1) - self.getHeight(x0, z0))/(255*self.heightScale))/np.pi * 180
